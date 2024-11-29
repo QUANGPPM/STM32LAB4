@@ -1,0 +1,4 @@
+button.c:24:6:get_input_button	24	static
+button.c:30:9:get_pressed_flag	16	static
+button.c:33:6:set_pressed_flag	16	static
+button.c:37:6:getInputKey	16	static

@@ -1,0 +1,7 @@
+led7_segment.c:11:6:init_display	24	static
+led7_segment.c:40:6:display7SEG	24	static
+led7_segment.c:50:6:clear_all_LED	24	static
+led7_segment.c:53:6:execute_7SEG_LED	32	static
+led7_segment.c:98:6:enableSEG	24	static
+led7_segment.c:104:6:update_segment_buffer	16	static
+led7_segment.c:111:6:scan_led7_segment	8	static

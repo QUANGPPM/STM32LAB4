@@ -23,6 +23,12 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Scheduler.h"
+#include "software_timer.h"
+#include "led7_segment.h"
+#include "fsm_automatic.h"
+#include "button.h"
+#include "fsm_setting.h"
+#include "fsm_manual.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +63,11 @@ static void MX_TIM2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	SCH_Update();
+	if(htim->Instance == htim2.Instance){
+			timeRun();
+			getInputKey();
+			SCH_Update();
+		}
 }
 
 
@@ -98,8 +108,25 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
+  init_display(SEG0_GPIO_Port, SEG0_Pin,
+   		  	   SEG1_GPIO_Port, SEG1_Pin,
+   			   SEG2_GPIO_Port, SEG2_Pin,
+   			   SEG3_GPIO_Port, SEG3_Pin,
+   			   SEG4_GPIO_Port, SEG4_Pin,
+   			   SEG5_GPIO_Port, SEG5_Pin,
+   			   SEG6_GPIO_Port, SEG6_Pin);
+  setTimer(0,100);
   SCH_Init();
-  SCH_Add_Task(&Blink_LED, 0, 500);
+  // add Blink LED function
+  SCH_Add_Task(&Blink_LED, 0, 1000);
+  // add automatic mode
+  SCH_Add_Task(&fsm_automatic, 0, 10);
+  // add manual mode
+  SCH_Add_Task(&fsm_manual, 0, 10);
+  //add setting mode
+  SCH_Add_Task(&fsm_setting, 0, 30);
+  // add scan segment
+  SCH_Add_Task(&scan_led7_segment, 0, 100);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -206,16 +233,45 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(BLINK_LED_GPIO_Port, BLINK_LED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, BLINK_LED_Pin|EN0_Pin|EN1_Pin|EN2_Pin
+                          |EN3_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : BLINK_LED_Pin */
-  GPIO_InitStruct.Pin = BLINK_LED_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin|LED_GREEN_LR_Pin
+                          |LED_YELLOW_LR_Pin|LED_RED_LR_Pin|SEG3_Pin|SEG4_Pin
+                          |SEG5_Pin|SEG6_Pin|LED_GREEN_AL_Pin|LED_YELLOW_AL_Pin
+                          |LED_RED_AL_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : BLINK_LED_Pin EN0_Pin EN1_Pin EN2_Pin
+                           EN3_Pin */
+  GPIO_InitStruct.Pin = BLINK_LED_Pin|EN0_Pin|EN1_Pin|EN2_Pin
+                          |EN3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(BLINK_LED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : SEG0_Pin SEG1_Pin SEG2_Pin LED_GREEN_LR_Pin
+                           LED_YELLOW_LR_Pin LED_RED_LR_Pin SEG3_Pin SEG4_Pin
+                           SEG5_Pin SEG6_Pin LED_GREEN_AL_Pin LED_YELLOW_AL_Pin
+                           LED_RED_AL_Pin */
+  GPIO_InitStruct.Pin = SEG0_Pin|SEG1_Pin|SEG2_Pin|LED_GREEN_LR_Pin
+                          |LED_YELLOW_LR_Pin|LED_RED_LR_Pin|SEG3_Pin|SEG4_Pin
+                          |SEG5_Pin|SEG6_Pin|LED_GREEN_AL_Pin|LED_YELLOW_AL_Pin
+                          |LED_RED_AL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Button1_Pin Button2_Pin Button3_Pin */
+  GPIO_InitStruct.Pin = Button1_Pin|Button2_Pin|Button3_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 }
 
