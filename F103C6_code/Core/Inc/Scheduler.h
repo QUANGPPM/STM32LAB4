@@ -7,17 +7,22 @@
 
 #ifndef INC_SCHEDULER_H_
 #define INC_SCHEDULER_H_
+#include <stdlib.h>
 #include <stdint.h>
-typedef struct{
-	void (*pTask)(void);
-	uint32_t Delay;
-	uint32_t Period;
-	uint8_t RunMe;
-	//task ID
-	uint32_t TaskID;
-}sTask;
+typedef struct TaskNode {
+   void (*pTask)(void);
+   uint32_t Delay;
+   uint32_t Period;
+	 uint32_t RunMe;
+   struct TaskNode* next;
+}TaskNode;
 
-#define SCH_MAX_TASKS 40
+typedef struct {
+	TaskNode* head;
+	TaskNode* tail;
+}TaskList;
+
+
 #define TICK 10
 
 
@@ -32,6 +37,6 @@ void SCH_Update(void);
 
 void SCH_Dispatch_Tasks(void);
 
-void SCH_Delete_Task(uint32_t index);
+void SCH_Delete_Task(void);
 
 #endif /* INC_SCHEDULER_H_ */

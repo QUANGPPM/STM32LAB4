@@ -118,7 +118,7 @@ int main(void)
   setTimer(0,100);
   SCH_Init();
   // add Blink LED function
-  SCH_Add_Task(&Blink_LED, 0, 1000);
+  SCH_Add_Task(&Blink_LED, 0, 300);
   // add automatic mode
   SCH_Add_Task(&fsm_automatic, 0, 10);
   // add manual mode
